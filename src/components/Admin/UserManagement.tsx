@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { CheckCircle, XCircle, Ban, MessageCircle, Instagram, ArrowLeft, LogOut } from 'lucide-react';
+import { CheckCircle, XCircle, Ban, MessageCircle, Instagram, ArrowLeft, LogOut, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
   AlertDialog,
@@ -28,13 +28,15 @@ interface UserProfile {
   approved_at?: string;
 }
 
+type ActionType = 'approve' | 'reject' | 'suspend' | 'delete';
+
 export const UserManagement = () => {
   const { isAdmin, user, signOut } = useAuth();
   const navigate = useNavigate();
   const [pendingUsers, setPendingUsers] = useState<UserProfile[]>([]);
   const [approvedUsers, setApprovedUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [actionUser, setActionUser] = useState<{ id: string; action: 'approve' | 'reject' | 'suspend' } | null>(null);
+  const [actionUser, setActionUser] = useState<{ id: string; action: ActionType } | null>(null);
   
   // Admin contact settings
   const [adminWhatsApp, setAdminWhatsApp] = useState('');
@@ -97,8 +99,12 @@ export const UserManagement = () => {
 
       if (error) throw error;
 
-      const pending = data?.filter(u => !u.is_approved) || [];
-      const approved = data?.filter(u => u.is_approved) || [];
+      // Filter out admin from both lists
+      const adminEmail = 'tokoanjar09@gmail.com';
+      const filteredData = data?.filter(u => u.email !== adminEmail) || [];
+      
+      const pending = filteredData.filter(u => !u.is_approved);
+      const approved = filteredData.filter(u => u.is_approved);
 
       setPendingUsers(pending);
       setApprovedUsers(approved);
@@ -176,6 +182,13 @@ export const UserManagement = () => {
 
   const handleSuspend = async (userId: string) => {
     try {
+      // Remove user role
+      await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId);
+
+      // Update profile
       const { error } = await supabase
         .from('profiles')
         .update({
@@ -192,6 +205,60 @@ export const UserManagement = () => {
     } catch (error) {
       console.error('Error suspending user:', error);
       toast.error('Gagal suspend user');
+    } finally {
+      setActionUser(null);
+    }
+  };
+
+  const handleDelete = async (userId: string) => {
+    try {
+      // Get user data for backup
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (profile) {
+        // Create backup data
+        const backupData = {
+          profile,
+          timestamp: new Date().toISOString(),
+          deleted_by: user?.id
+        };
+
+        // Download backup as JSON
+        const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `user-backup-${profile.username}-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      // Delete user profile (will cascade to auth.users)
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('user_id', userId);
+
+      if (profileError) throw profileError;
+
+      // Delete from auth
+      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+      
+      if (authError) {
+        console.error('Auth delete error:', authError);
+      }
+
+      toast.success('User dihapus dan backup berhasil diunduh');
+      fetchUsers();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast.error('Gagal menghapus user');
     } finally {
       setActionUser(null);
     }
@@ -375,15 +442,26 @@ export const UserManagement = () => {
                       Disetujui: {user.approved_at ? new Date(user.approved_at).toLocaleString('id-ID') : '-'}
                     </p>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setActionUser({ id: user.user_id, action: 'suspend' })}
-                    className="w-full sm:w-auto"
-                  >
-                    <Ban className="h-4 w-4 mr-1" />
-                    Suspend
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setActionUser({ id: user.user_id, action: 'suspend' })}
+                      className="w-full sm:w-auto"
+                    >
+                      <Ban className="h-4 w-4 mr-1" />
+                      Suspend
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => setActionUser({ id: user.user_id, action: 'delete' })}
+                      className="w-full sm:w-auto"
+                    >
+                      <XCircle className="h-4 w-4 mr-1" />
+                      Hapus
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -399,6 +477,7 @@ export const UserManagement = () => {
               {actionUser?.action === 'approve' && 'Setujui User?'}
               {actionUser?.action === 'reject' && 'Tolak & Hapus User?'}
               {actionUser?.action === 'suspend' && 'Suspend User?'}
+              {actionUser?.action === 'delete' && 'Hapus User Permanen?'}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {actionUser?.action === 'approve' &&
@@ -407,6 +486,8 @@ export const UserManagement = () => {
                 'User akan dihapus dari database dan tidak dapat login. Jika ingin mendaftar lagi, mereka harus menghubungi admin.'}
               {actionUser?.action === 'suspend' &&
                 'User tidak akan dapat login sampai disetujui kembali.'}
+              {actionUser?.action === 'delete' &&
+                'User akan dihapus permanen dari database. Data akan di-backup dan otomatis terdownload sebelum dihapus.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -416,6 +497,7 @@ export const UserManagement = () => {
                 if (actionUser?.action === 'approve') handleApprove(actionUser.id);
                 if (actionUser?.action === 'reject') handleReject(actionUser.id);
                 if (actionUser?.action === 'suspend') handleSuspend(actionUser.id);
+                if (actionUser?.action === 'delete') handleDelete(actionUser.id);
               }}
             >
               Ya, Lanjutkan

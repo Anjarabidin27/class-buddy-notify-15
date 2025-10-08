@@ -38,7 +38,7 @@ export const generateA4PrintContent = ({
   <style>
     @page {
       size: A4;
-      margin: 2cm;
+      margin: 1.5cm;
     }
     
     * {
@@ -49,8 +49,8 @@ export const generateA4PrintContent = ({
     
     body {
       font-family: 'Arial', 'Helvetica', sans-serif;
-      font-size: 11pt;
-      line-height: 1.4;
+      font-size: 10pt;
+      line-height: 1.3;
       color: #000;
       background: white;
     }
@@ -66,33 +66,33 @@ export const generateA4PrintContent = ({
     .header {
       text-align: center;
       border-bottom: 3px solid #000;
-      padding-bottom: 15px;
-      margin-bottom: 20px;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
     }
     
     .header h1 {
-      font-size: 24pt;
+      font-size: 20pt;
       font-weight: bold;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
     }
     
     .header .store-info {
-      font-size: 10pt;
+      font-size: 9pt;
       color: #333;
-      margin-bottom: 3px;
+      margin-bottom: 2px;
     }
     
     .header .report-title {
-      font-size: 16pt;
+      font-size: 14pt;
       font-weight: bold;
-      margin-top: 15px;
-      margin-bottom: 5px;
+      margin-top: 8px;
+      margin-bottom: 3px;
     }
     
     .header .period {
-      font-size: 11pt;
+      font-size: 9pt;
       color: #555;
     }
     
@@ -100,15 +100,15 @@ export const generateA4PrintContent = ({
     .summary-box {
       background: #f8f9fa;
       border: 2px solid #dee2e6;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 25px;
+      border-radius: 6px;
+      padding: 15px;
+      margin-bottom: 20px;
     }
     
     .summary-title {
-      font-size: 14pt;
+      font-size: 12pt;
       font-weight: bold;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
       text-align: center;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -152,14 +152,14 @@ export const generateA4PrintContent = ({
     
     /* Table */
     .transactions-section {
-      margin-top: 30px;
+      margin-top: 20px;
     }
     
     .section-title {
-      font-size: 14pt;
+      font-size: 12pt;
       font-weight: bold;
-      margin-bottom: 12px;
-      padding-bottom: 8px;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
       border-bottom: 2px solid #000;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -168,8 +168,8 @@ export const generateA4PrintContent = ({
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 20px;
-      font-size: 10pt;
+      margin-bottom: 15px;
+      font-size: 9pt;
     }
     
     thead {
@@ -178,7 +178,7 @@ export const generateA4PrintContent = ({
     }
     
     th {
-      padding: 10px 8px;
+      padding: 8px 6px;
       text-align: left;
       font-weight: bold;
       border: 1px solid #000;
@@ -193,7 +193,7 @@ export const generateA4PrintContent = ({
     }
     
     td {
-      padding: 8px;
+      padding: 6px;
       border: 1px solid #dee2e6;
     }
     
@@ -206,10 +206,10 @@ export const generateA4PrintContent = ({
     }
     
     .item-details {
-      font-size: 9pt;
+      font-size: 8pt;
       color: #666;
-      padding-left: 15px;
-      margin-top: 3px;
+      padding-left: 12px;
+      margin-top: 2px;
     }
     
     .discount-row {
@@ -224,29 +224,29 @@ export const generateA4PrintContent = ({
     
     /* Footer */
     .footer {
-      margin-top: 40px;
-      padding-top: 20px;
+      margin-top: 30px;
+      padding-top: 15px;
       border-top: 2px solid #000;
       text-align: center;
-      font-size: 9pt;
+      font-size: 8pt;
       color: #666;
     }
     
     .signature-section {
       display: flex;
       justify-content: space-around;
-      margin-top: 50px;
-      margin-bottom: 30px;
+      margin-top: 40px;
+      margin-bottom: 25px;
     }
     
     .signature-box {
       text-align: center;
-      width: 200px;
+      width: 180px;
     }
     
     .signature-line {
       border-top: 1px solid #000;
-      margin-top: 60px;
+      margin-top: 50px;
       padding-top: 5px;
     }
     

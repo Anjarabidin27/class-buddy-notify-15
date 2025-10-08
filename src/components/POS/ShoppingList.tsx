@@ -243,8 +243,11 @@ export const ShoppingList = () => {
                 Daftar Belanja
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant="secondary">
+                <Badge variant="secondary" className="hidden sm:inline-flex">
                   {pendingItems.length} pending
+                </Badge>
+                <Badge variant="secondary" className="sm:hidden">
+                  {pendingItems.length}
                 </Badge>
                 {completedItems.length > 0 && (
                   <Badge variant="outline">
